@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>계약서 뚝딱 — AI 계약서 자동 작성</title>
+<meta name="description" content="차용증, 근로계약서, 동업계약서 등 8종 계약서를 AI가 5분 만에 자동 작성해드립니다.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="계약서 뚝딱 — AI 계약서 자동 작성">
+<meta property="og:description" content="차용증, 근로계약서, 동업계약서 등 8종 계약서를 AI가 5분 만에 자동 작성. Word 파일 다운로드까지!">
+<meta property="og:url" content="https://fanciful-fairy-0b34d0.netlify.app">
+<meta property="og:image" content="https://fanciful-fairy-0b34d0.netlify.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="계약서 뚝딱 — AI 계약서 자동 작성">
+<meta name="twitter:description" content="차용증, 근로계약서, 동업계약서 등 AI가 5분 만에 자동 작성">
+<meta name="twitter:image" content="https://fanciful-fairy-0b34d0.netlify.app/og-image.png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<style>
+:root {
+  --black: #111110;
+  --white: #FAFAF7;
+  --cream: #F2F0E8;
+  --gold: #C49A3C;
+  --gold-light: #E8D5A3;
+  --gray: #6B6B67;
+  --gray-light: #E0DED6;
+  --serif: 'Noto Serif KR', serif;
+  --sans: 'Noto Sans KR', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--white); color: var(--black); overflow-x: hidden; }
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 1rem 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(250,250,247,0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--gray-light);
+}
+.nav-logo { font-family: var(--serif); font-size: 1.2rem; font-weight: 700; color: var(--black); text-decoration: none; letter-spacing: -0.02em; }
+.nav-logo span { color: var(--gold); }
+.nav-cta { background: var(--black); color: var(--white); padding: 8px 20px; border-radius: 2px; font-size: 13px; font-weight: 500; text-decoration: none; border: none; cursor: pointer; font-family: var(--sans); transition: background .2s; }
+.nav-cta:hover { background: var(--gold); }
+
+.hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8rem 2rem 4rem; background: var(--white); position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(196,154,60,0.08) 0%, transparent 70%); pointer-events: none; }
+.hero-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--cream); border: 1px solid var(--gold-light); padding: 5px 14px; border-radius: 20px; font-size: 12px; color: var(--gold); font-weight: 500; margin-bottom: 2rem; animation: fadeUp .6s ease both; }
+.hero h1 { font-family: var(--serif); font-size: clamp(2.4rem, 6vw, 4.2rem); font-weight: 700; line-height: 1.2; letter-spacing: -0.03em; color: var(--black); margin-bottom: 1.25rem; animation: fadeUp .6s .1s ease both; }
+.hero h1 em { font-style: normal; color: var(--gold); }
+.hero p { font-size: clamp(1rem, 2vw, 1.15rem); color: var(--gray); line-height: 1.7; max-width: 520px; margin-bottom: 2.5rem; animation: fadeUp .6s .2s ease both; font-weight: 300; }
+.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; animation: fadeUp .6s .3s ease both; }
+.btn-hero { padding: 14px 32px; font-size: 15px; font-weight: 500; border-radius: 2px; cursor: pointer; border: none; font-family: var(--sans); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all .2s; }
+.btn-hero.primary { background: var(--black); color: var(--white); }
+.btn-hero.primary:hover { background: var(--gold); }
+.btn-hero.secondary { background: transparent; color: var(--black); border: 1px solid var(--gray-light); }
+.btn-hero.secondary:hover { border-color: var(--black); }
+.hero-stats { display: flex; gap: 3rem; margin-top: 4rem; justify-content: center; flex-wrap: wrap; animation: fadeUp .6s .4s ease both; }
+.stat { text-align: center; }
+.stat strong { display: block; font-family: var(--serif); font-size: 1.8rem; font-weight: 700; color: var(--black); }
+.stat span { font-size: 12px; color: var(--gray); }
+
+.section { padding: 6rem 2rem; }
+.section-inner { max-width: 1000px; margin: 0 auto; }
+.section-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: .75rem; }
+.section-title { font-family: var(--serif); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; margin-bottom: 1rem; color: var(--black); }
+.section-sub { font-size: 1rem; color: var(--gray); line-height: 1.7; font-weight: 300; max-width: 520px; }
+.feat-bg { background: var(--cream); }
+
+.feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--gray-light); border: 1px solid var(--gray-light); margin-top: 3rem; }
+.feat-item { background: var(--cream); padding: 2rem 1.75rem; transition: background .2s; }
+.feat-item:hover { background: var(--white); }
+.feat-icon { width: 40px; height: 40px; background: var(--white); border: 1px solid var(--gold-light); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 1rem; }
+.feat-item h3 { font-size: 15px; font-weight: 700; margin-bottom: .5rem; }
+.feat-item p { font-size: 13px; color: var(--gray); line-height: 1.7; font-weight: 300; }
+
+.types-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 3rem; }
+.type-card { border: 1px solid var(--gray-light); padding: 1.25rem 1rem; text-align: center; cursor: pointer; transition: all .2s; background: var(--white); }
+.type-card:hover { border-color: var(--gold); background: var(--cream); }
+.type-card .t-icon { font-size: 24px; margin-bottom: .5rem; }
+.type-card .t-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.type-card .t-desc { font-size: 11px; color: var(--gray); }
+
+.price-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 3rem; }
+.price-card { border: 1px solid var(--gray-light); padding: 2rem 1.5rem; background: var(--white); position: relative; }
+.price-card.featured { border-color: var(--gold); background: var(--black); color: var(--white); }
+.price-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--white); font-size: 11px; font-weight: 700; padding: 3px 12px; letter-spacing: .06em; }
+.price-name { font-size: 13px; font-weight: 500; margin-bottom: .75rem; color: var(--gray); }
+.price-card.featured .price-name { color: var(--gold-light); }
+.price-amount { font-family: var(--serif); font-size: 2.2rem; font-weight: 700; line-height: 1; margin-bottom: .25rem; }
+.price-unit { font-size: 12px; color: var(--gray); margin-bottom: 1.5rem; }
+.price-card.featured .price-unit { color: var(--gold-light); }
+.price-list { list-style: none; }
+.price-list li { font-size: 13px; color: var(--gray); padding: 6px 0; border-bottom: 1px solid var(--gray-light); display: flex; gap: 8px; font-weight: 300; }
+.price-card.featured .price-list li { color: #ccc; border-color: #333; }
+.price-list li::before { content: '✓'; color: var(--gold); font-weight: 700; }
+.price-btn { width: 100%; margin-top: 1.5rem; padding: 12px; font-size: 13px; font-weight: 700; cursor: pointer; border-radius: 2px; font-family: var(--sans); transition: all .2s; }
+.price-btn.dark { background: var(--black); color: var(--white); border: none; }
+.price-btn.dark:hover { background: var(--gold); }
+.price-btn.gold { background: var(--gold); color: var(--white); border: none; }
+.price-btn.gold:hover { background: #a8822e; }
+.price-btn.outline { background: transparent; color: var(--white); border: 1px solid #444; }
+.price-btn.outline:hover { border-color: var(--gold); color: var(--gold); }
+
+#app-section { background: var(--cream); padding: 5rem 2rem; }
+.app-wrap { max-width: 780px; margin: 0 auto; }
+.app-header { text-align: center; margin-bottom: 2.5rem; }
+
+.contract-types { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+.ct-btn { padding: 10px 6px; border: 1px solid var(--gray-light); background: var(--white); cursor: pointer; text-align: center; transition: all .15s; font-family: var(--sans); }
+.ct-btn.active { border-color: var(--gold); background: var(--black); color: var(--white); }
+.ct-btn .ct-icon { font-size: 18px; display: block; margin-bottom: 3px; }
+.ct-btn .ct-name { font-size: 11px; font-weight: 500; }
+
+.app-card { background: var(--white); border: 1px solid var(--gray-light); padding: 1.75rem; margin-bottom: 1rem; }
+.app-card-title { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gray); margin-bottom: 1rem; }
+.fg { display: grid; gap: 10px; margin-bottom: 10px; }
+.fg.c2 { grid-template-columns: 1fr 1fr; }
+.fg.c3 { grid-template-columns: 1fr 1fr 1fr; }
+.field label { font-size: 11px; color: var(--gray); display: block; margin-bottom: 4px; font-weight: 500; }
+.field input, .field select, .field textarea { width: 100%; padding: 9px 12px; font-size: 13px; border: 1px solid var(--gray-light); background: var(--white); color: var(--black); font-family: var(--sans); outline: none; transition: border-color .15s; border-radius: 0; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--gold); }
+.field textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+.app-actions { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+.abtn { padding: 13px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; font-family: var(--sans); transition: all .2s; border-radius: 0; }
+.abtn.primary { background: var(--black); color: var(--white); }
+.abtn.primary:hover { background: var(--gold); }
+.abtn.secondary { background: var(--cream); color: var(--black); border: 1px solid var(--gray-light); }
+.abtn.secondary:hover { background: var(--gray-light); }
+.abtn:disabled { opacity: .4; cursor: not-allowed; }
+
+.result-box { background: var(--white); border: 1px solid var(--gold-light); padding: 1.75rem; margin-top: 1rem; display: none; }
+.result-box.on { display: block; }
+.result-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: .75rem; border-bottom: 1px solid var(--gray-light); }
+.result-top h4 { font-family: var(--serif); font-size: 15px; font-weight: 700; }
+.result-top-btns { display: flex; gap: 6px; }
+.mini { font-size: 11px; padding: 4px 12px; border: 1px solid var(--gray-light); cursor: pointer; background: var(--white); font-family: var(--sans); transition: all .15s; border-radius: 0; }
+.mini:hover { background: var(--cream); }
+.result-text { font-size: 13px; line-height: 2; color: var(--black); white-space: pre-wrap; font-family: var(--sans); font-weight: 300; }
+.loading { display: flex; gap: 4px; align-items: center; padding: 1rem 0; }
+.ld { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: ld 1.2s ease infinite; }
+.ld:nth-child(2){animation-delay:.2s}.ld:nth-child(3){animation-delay:.4s}
+@keyframes ld { 0%,80%,100%{opacity:.2}40%{opacity:1} }
+.app-note { font-size: 11px; color: var(--gray); margin-top: 10px; text-align: center; font-weight: 300; }
+
+footer { background: var(--black); color: var(--white); padding: 3rem 2.5rem; text-align: center; }
+footer .f-logo { font-family: var(--serif); font-size: 1.3rem; font-weight: 700; margin-bottom: .5rem; }
+footer .f-logo span { color: var(--gold); }
+footer p { font-size: 12px; color: #666; font-weight: 300; line-height: 1.8; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 700px) {
+  nav { padding: 1rem 1.25rem; }
+  .feat-grid, .types-grid, .price-grid, .contract-types { grid-template-columns: 1fr 1fr; }
+  .app-actions { grid-template-columns: 1fr; }
+  .fg.c2, .fg.c3 { grid-template-columns: 1fr; }
+  .hero-stats { gap: 2rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">계약서<span>뚝딱</span></a>
+  <a class="nav-cta" href="#app-section">무료로 시작하기</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">✦ AI 기반 계약서 자동 작성 서비스</div>
+  <h1>계약서, 이제<br><em>5분이면 충분</em>합니다</h1>
+  <p>변호사 없이도 법적 효력 있는 계약서를 즉시 작성하세요. 차용증부터 근로계약서까지, AI가 정확하게 완성해드립니다.</p>
+  <div class="hero-actions">
+    <a class="btn-hero primary" href="#app-section">지금 바로 작성하기 →</a>
+    <a class="btn-hero secondary" href="#types">계약서 종류 보기</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><strong>8종</strong><span>계약서 지원</span></div>
+    <div class="stat"><strong>5분</strong><span>평균 완성 시간</span></div>
+    <div class="stat"><strong>Word</strong><span>파일 다운로드</span></div>
+  </div>
+</section>
+
+<section class="section feat-bg reveal">
+  <div class="section-inner">
+    <div class="section-label">왜 계약서뚝딱인가</div>
+    <div class="section-title">복잡한 계약서 작성,<br>이젠 혼자서도 됩니다</div>
+    <div class="section-sub">법률 지식이 없어도 정보만 입력하면 AI가 완성된 계약서를 만들어드립니다.</div>
+    <div class="feat-grid">
+      <div class="feat-item"><div class="feat-icon">⚡</div><h3>5분 완성</h3><p>이름, 금액, 날짜 등 기본 정보만 입력하면 완성된 계약서가 즉시 생성됩니다.</p></div>
+      <div class="feat-item"><div class="feat-icon">⚖️</div><h3>법적 효력</h3><p>한국 민법 기준에 맞는 조항과 서식으로 실제 사용 가능한 계약서를 작성합니다.</p></div>
+      <div class="feat-item"><div class="feat-icon">📄</div><h3>Word 다운로드</h3><p>생성된 계약서를 Word 파일로 즉시 다운로드하여 수정·출력·보관할 수 있습니다.</p></div>
+      <div class="feat-item"><div class="feat-icon">🔒</div><h3>안전한 개인정보</h3><p>입력한 정보는 계약서 생성에만 사용되며 별도로 저장되지 않습니다.</p></div>
+      <div class="feat-item"><div class="feat-icon">✏️</div><h3>맞춤 특약 추가</h3><p>이자율, 담보 조건, 특약사항 등 원하는 내용을 자유롭게 추가할 수 있습니다.</p></div>
+      <div class="feat-item"><div class="feat-icon">📱</div><h3>모바일 지원</h3><p>PC, 태블릿, 스마트폰 어디서든 편리하게 계약서를 작성할 수 있습니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section reveal" id="types">
+  <div class="section-inner">
+    <div class="section-label">지원 계약서</div>
+    <div class="section-title">8가지 계약서를<br>모두 지원합니다</div>
+    <div class="types-grid">
+      <div class="type-card" onclick="scrollToApp('차용증')"><div class="t-icon">💰</div><div class="t-name">차용증</div><div class="t-desc">금전 대여 계약</div></div>
+      <div class="type-card" onclick="scrollToApp('근로계약서')"><div class="t-icon">💼</div><div class="t-name">근로계약서</div><div class="t-desc">고용 계약</div></div>
+      <div class="type-card" onclick="scrollToApp('동업계약서')"><div class="t-icon">🤝</div><div class="t-name">동업계약서</div><div class="t-desc">공동 사업</div></div>
+      <div class="type-card" onclick="scrollToApp('임대차계약서')"><div class="t-icon">🏠</div><div class="t-name">임대차계약서</div><div class="t-desc">부동산 임대</div></div>
+      <div class="type-card" onclick="scrollToApp('용역계약서')"><div class="t-icon">📋</div><div class="t-name">용역계약서</div><div class="t-desc">프리랜서 계약</div></div>
+      <div class="type-card" onclick="scrollToApp('비밀유지계약서')"><div class="t-icon">🔒</div><div class="t-name">비밀유지(NDA)</div><div class="t-desc">정보 보호</div></div>
+      <div class="type-card" onclick="scrollToApp('매매계약서')"><div class="t-icon">🛒</div><div class="t-name">매매계약서</div><div class="t-desc">물건 매매</div></div>
+      <div class="type-card" onclick="scrollToApp('위임장')"><div class="t-icon">📝</div><div class="t-name">위임장</div><div class="t-desc">권한 위임</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section feat-bg reveal">
+  <div class="section-inner">
+    <div class="section-label">요금제</div>
+    <div class="section-title">합리적인 가격으로<br>시작하세요</div>
+    <div class="price-grid">
+      <div class="price-card">
+        <div class="price-name">기본</div>
+        <div class="price-amount">무료</div>
+        <div class="price-unit">1회 무료 체험</div>
+        <ul class="price-list">
+          <li>계약서 1건 무료 생성</li>
+          <li>화면 복사 가능</li>
+          <li>모든 계약서 종류</li>
+        </ul>
+        <button class="price-btn dark" onclick="document.getElementById('app-section').scrollIntoView({behavior:'smooth'})">무료로 시작</button>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">인기</div>
+        <div class="price-name">건당</div>
+        <div class="price-amount">1,900원</div>
+        <div class="price-unit">계약서 1건당</div>
+        <ul class="price-list">
+          <li>계약서 즉시 생성</li>
+          <li>Word 파일 다운로드</li>
+          <li>특약사항 무제한</li>
+          <li>24시간 이용 가능</li>
+        </ul>
+        <button class="price-btn gold" onclick="document.getElementById('app-section').scrollIntoView({behavior:'smooth'})">지금 시작하기</button>
+      </div>
+      <div class="price-card">
+        <div class="price-name">월정액</div>
+        <div class="price-amount">9,900원</div>
+        <div class="price-unit">월 / 무제한 이용</div>
+        <ul class="price-list">
+          <li>계약서 무제한 생성</li>
+          <li>Word + PDF 다운로드</li>
+          <li>저장 보관함 제공</li>
+          <li>우선 고객 지원</li>
+        </ul>
+        <button class="price-btn dark">곧 출시 예정</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="app-section">
+  <div class="app-wrap">
+    <div class="app-header reveal">
+      <div class="section-label" style="text-align:center">지금 바로 작성</div>
+      <div class="section-title" style="text-align:center;font-size:1.8rem">계약서를 만들어보세요</div>
+    </div>
+    <div class="contract-types reveal" id="typeGrid"></div>
+    <div class="app-card reveal">
+      <div class="app-card-title" id="formTitle">차용증 정보 입력</div>
+      <div id="formFields"></div>
+      <div class="field" style="margin-top:6px">
+        <label>추가 요청사항 (선택)</label>
+        <textarea id="extra" placeholder="예) 이자는 연 5%, 연체 시 손해금 별도 청구, 담보 조건 등 자유롭게 적어주세요."></textarea>
+      </div>
+    </div>
+    <div class="app-actions reveal">
+      <button class="abtn primary" id="genBtn" onclick="generate()">계약서 생성하기</button>
+      <button class="abtn secondary" id="dlBtn" onclick="downloadDocx()" disabled>Word 다운로드</button>
+    </div>
+    <div class="result-box" id="resultBox">
+      <div class="result-top">
+        <h4 id="resTitle">계약서</h4>
+        <div class="result-top-btns">
+          <button class="mini" onclick="copyText()">복사</button>
+          <button class="mini" onclick="generate()">다시 생성</button>
+        </div>
+      </div>
+      <div class="result-text" id="resText"></div>
+    </div>
+    <p class="app-note reveal">* 생성된 계약서는 참고용입니다. 중요한 계약은 법률 전문가 검토를 권장합니다.</p>
+
+    <div style="display:flex;justify-content:center;margin-top:2rem;">
+      <ins class="kakao_ad_area" style="display:none;"
+        data-ad-unit = "DAN-J09QNuydfSIkwUjG"
+        data-ad-width = "320"
+        data-ad-height = "480"></ins>
+      <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="f-logo">계약서<span>뚝딱</span></div>
+  <p>AI 기반 계약서 자동 작성 서비스<br>© 2025 계약서뚝딱. All rights reserved.<br><br>본 서비스에서 생성된 계약서는 법적 효력을 보장하지 않습니다.<br>중요한 계약의 경우 반드시 법률 전문가의 검토를 받으시기 바랍니다.</p>
+</footer>
+
+<script>
+const TYPES = [
+  {id:'차용증',icon:'💰',desc:'금전 대여'},{id:'근로계약서',icon:'💼',desc:'고용 계약'},
+  {id:'동업계약서',icon:'🤝',desc:'공동 사업'},{id:'임대차계약서',icon:'🏠',desc:'부동산 임대'},
+  {id:'용역계약서',icon:'📋',desc:'프리랜서'},{id:'비밀유지계약서',icon:'🔒',desc:'NDA'},
+  {id:'매매계약서',icon:'🛒',desc:'매매'},{id:'위임장',icon:'📝',desc:'권한 위임'},
+];
+const FIELDS = {
+  차용증:[
+    {cols:2,fields:[{id:'lender',label:'채권자 (빌려주는 사람) 이름',ph:'홍길동'},{id:'lender_id',label:'채권자 주민등록번호',ph:'000000-0000000'}]},
+    {cols:2,fields:[{id:'borrower',label:'채무자 (빌리는 사람) 이름',ph:'김철수'},{id:'borrower_id',label:'채무자 주민등록번호',ph:'000000-0000000'}]},
+    {cols:1,fields:[{id:'lender_addr',label:'채권자 주소',ph:'서울시 강남구 테헤란로 123'}]},
+    {cols:1,fields:[{id:'borrower_addr',label:'채무자 주소',ph:'서울시 마포구 월드컵로 456'}]},
+    {cols:3,fields:[{id:'amount',label:'차용 금액 (원)',ph:'10,000,000'},{id:'interest',label:'이자율 (연 %)',ph:'5'},{id:'repay_date',label:'상환일',type:'date'}]},
+  ],
+  근로계약서:[
+    {cols:2,fields:[{id:'company',label:'회사명',ph:'(주)예시회사'},{id:'biz_no',label:'사업자등록번호',ph:'000-00-00000'}]},
+    {cols:2,fields:[{id:'worker',label:'근로자 이름',ph:'이영희'},{id:'worker_id',label:'주민등록번호',ph:'000000-0000000'}]},
+    {cols:1,fields:[{id:'work_place',label:'근무지 주소',ph:'서울시 강남구 테헤란로 123'}]},
+    {cols:1,fields:[{id:'job',label:'담당 업무',ph:'마케팅 기획, 콘텐츠 제작'}]},
+    {cols:3,fields:[{id:'salary',label:'월 급여 (원)',ph:'3,000,000'},{id:'hours',label:'근무 시간',ph:'09:00~18:00'},{id:'start',label:'계약 시작일',type:'date'}]},
+  ],
+  동업계약서:[
+    {cols:2,fields:[{id:'p1',label:'동업자 1 이름',ph:'홍길동'},{id:'p1_share',label:'지분율 (%)',ph:'60'}]},
+    {cols:2,fields:[{id:'p2',label:'동업자 2 이름',ph:'김철수'},{id:'p2_share',label:'지분율 (%)',ph:'40'}]},
+    {cols:1,fields:[{id:'biz',label:'사업 내용',ph:'온라인 쇼핑몰 운영'}]},
+    {cols:2,fields:[{id:'inv1',label:'투자금 - 동업자 1 (원)',ph:'6,000,000'},{id:'inv2',label:'투자금 - 동업자 2 (원)',ph:'4,000,000'}]},
+    {cols:2,fields:[{id:'biz_addr',label:'사업장 주소',ph:'서울시 성동구 ...'},{id:'start',label:'계약 시작일',type:'date'}]},
+  ],
+  임대차계약서:[
+    {cols:2,fields:[{id:'landlord',label:'임대인 (집주인) 이름',ph:'박민준'},{id:'landlord_tel',label:'임대인 연락처',ph:'010-0000-0000'}]},
+    {cols:2,fields:[{id:'tenant',label:'임차인 (세입자) 이름',ph:'이수진'},{id:'tenant_tel',label:'임차인 연락처',ph:'010-0000-0000'}]},
+    {cols:1,fields:[{id:'prop',label:'임대 부동산 주소',ph:'서울시 마포구 ...'}]},
+    {cols:3,fields:[{id:'deposit',label:'보증금 (원)',ph:'50,000,000'},{id:'rent',label:'월세 (원)',ph:'500,000'},{id:'mgmt',label:'관리비 (원)',ph:'100,000'}]},
+    {cols:2,fields:[{id:'rent_start',label:'임대 시작일',type:'date'},{id:'rent_end',label:'임대 종료일',type:'date'}]},
+  ],
+  용역계약서:[
+    {cols:2,fields:[{id:'client',label:'발주자 (의뢰인)',ph:'(주)ABC'},{id:'contractor',label:'수급자 (수행자)',ph:'홍길동'}]},
+    {cols:1,fields:[{id:'service',label:'용역 내용',ph:'웹사이트 제작 및 UI/UX 디자인'}]},
+    {cols:3,fields:[{id:'fee',label:'계약 금액 (원)',ph:'5,000,000'},{id:'advance',label:'선금 비율 (%)',ph:'30'},{id:'balance',label:'잔금 지급 조건',ph:'납품 후 7일 이내'}]},
+    {cols:2,fields:[{id:'svc_start',label:'용역 시작일',type:'date'},{id:'svc_end',label:'용역 완료일',type:'date'}]},
+    {cols:1,fields:[{id:'deliverable',label:'납품물',ph:'완성 소스코드, 디자인 파일, 운영 매뉴얼'}]},
+  ],
+  비밀유지계약서:[
+    {cols:2,fields:[{id:'discloser',label:'공개자 (정보 제공 측)',ph:'(주)스타트업'},{id:'recipient',label:'수령자 (정보 받는 측)',ph:'홍길동'}]},
+    {cols:1,fields:[{id:'purpose',label:'정보 공유 목적',ph:'투자 검토, 사업 제휴 협의'}]},
+    {cols:1,fields:[{id:'scope',label:'비밀 정보 범위',ph:'기술 자료, 재무 정보, 고객 데이터 등 일체'}]},
+    {cols:2,fields:[{id:'nda_start',label:'계약 시작일',type:'date'},{id:'nda_dur',label:'비밀 유지 기간',ph:'2년'}]},
+  ],
+  매매계약서:[
+    {cols:2,fields:[{id:'seller',label:'매도인 (파는 사람)',ph:'홍길동'},{id:'buyer',label:'매수인 (사는 사람)',ph:'김철수'}]},
+    {cols:1,fields:[{id:'item',label:'매매 물건',ph:'2022년식 현대 아반떼 (차량번호 12가 3456)'}]},
+    {cols:3,fields:[{id:'price',label:'매매 대금 (원)',ph:'15,000,000'},{id:'down',label:'계약금 (원)',ph:'1,500,000'},{id:'balance_date',label:'잔금 지급일',type:'date'}]},
+    {cols:1,fields:[{id:'item_cond',label:'물건 현재 상태',ph:'외관 양호, 주행거리 45,000km'}]},
+  ],
+  위임장:[
+    {cols:2,fields:[{id:'principal',label:'위임인 이름',ph:'홍길동'},{id:'principal_id',label:'위임인 주민등록번호',ph:'000000-0000000'}]},
+    {cols:2,fields:[{id:'agent',label:'수임인 이름',ph:'김철수'},{id:'agent_id',label:'수임인 주민등록번호',ph:'000000-0000000'}]},
+    {cols:1,fields:[{id:'auth',label:'위임 사항',ph:'부동산 등기 신청 및 관련 서류 제출 일체'}]},
+    {cols:2,fields:[{id:'auth_start',label:'위임 시작일',type:'date'},{id:'auth_end',label:'위임 종료일',type:'date'}]},
+  ],
+};
+
+let currentType = '차용증', generatedText = '';
+
+function scrollToApp(type) {
+  document.getElementById('app-section').scrollIntoView({behavior:'smooth'});
+  setTimeout(() => selectType(type), 600);
+}
+
+function renderTypes() {
+  document.getElementById('typeGrid').innerHTML = TYPES.map(t =>
+    `<button class="ct-btn${t.id===currentType?' active':''}" onclick="selectType('${t.id}')">
+      <span class="ct-icon">${t.icon}</span><span class="ct-name">${t.id}</span>
+    </button>`).join('');
+}
+
+function selectType(t) {
+  currentType = t; renderTypes(); renderForm();
+  document.getElementById('resultBox').classList.remove('on');
+  document.getElementById('dlBtn').disabled = true;
+  generatedText = '';
+}
+
+function renderForm() {
+  document.getElementById('formTitle').textContent = currentType + ' 정보 입력';
+  document.getElementById('formFields').innerHTML = (FIELDS[currentType]||[]).map(r => {
+    const cls = r.cols===3?'fg c3':r.cols===2?'fg c2':'fg';
+    return `<div class="${cls}">${r.fields.map(f => {
+      const inp = f.type==='date' ? `<input type="date" id="${f.id}">` : `<input type="text" id="${f.id}" placeholder="${f.ph||''}">`;
+      return `<div class="field"><label>${f.label}</label>${inp}</div>`;
+    }).join('')}</div>`;
+  }).join('');
+}
+
+function getData() {
+  return (FIELDS[currentType]||[]).flatMap(r=>r.fields)
+    .map(f => { const el=document.getElementById(f.id); return {label:f.label, value:el?el.value:''}; })
+    .filter(x => x.value);
+}
+
+async function generate() {
+  const btn = document.getElementById('genBtn');
+  const box = document.getElementById('resultBox');
+  const txt = document.getElementById('resText');
+  document.getElementById('resTitle').textContent = currentType;
+  btn.disabled = true; btn.textContent = '생성 중...';
+  box.classList.add('on');
+  txt.innerHTML = '<div class="loading"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div>';
+
+  const data = getData();
+  const extra = document.getElementById('extra').value;
+  const prompt = `다음 정보를 바탕으로 한국 법률에 맞는 완전한 ${currentType}를 작성해주세요.
+
+[입력 정보]
+${data.map(d=>`- ${d.label}: ${d.value}`).join('\n')||'(입력 없음)'}
+${extra?`\n[추가 요청사항]\n${extra}`:''}
+
+작성 규칙:
+1. 실제 법적으로 사용 가능한 완성된 형식
+2. 제목, 전문, 각 조항 (목적·의무·위반·해지 등), 특약사항, 날짜·서명란 포함
+3. 미입력 항목은 [   ] 빈칸 처리
+4. 조항은 제1조, 제2조 형식
+5. 한국어, 계약서 본문만 출력 (설명 없이)
+6. 마크다운 기호 절대 사용 금지 (**, ##, --, --- 등 사용하지 말 것)
+7. 순수 텍스트로만 작성`;
+
+  try {
+    const r = await fetch('/.netlify/functions/generate', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt })
+    });
+    const d = await r.json();
+    generatedText = d.content?.map(c=>c.text||'').join('') || '오류가 발생했습니다.';
+    txt.textContent = generatedText;
+    document.getElementById('dlBtn').disabled = false;
+  } catch(e) {
+    txt.textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+  }
+  btn.disabled = false; btn.textContent = '계약서 생성하기';
+}
+
+function copyText() {
+  if (!generatedText) return;
+  navigator.clipboard.writeText(generatedText);
+  const b = document.querySelector('.result-top-btns .mini');
+  b.textContent = '복사됨!'; setTimeout(() => b.textContent = '복사', 1500);
+}
+
+async function downloadDocx() {
+  if (!generatedText || typeof docx === 'undefined') return;
+  const {Document, Packer, Paragraph, TextRun, AlignmentType} = docx;
+  const children = generatedText.split('\n').map(line => {
+    const t = line.trim();
+    const isTitle = t === currentType || t.startsWith('【') || t.endsWith('】');
+    const isArticle = /^제\d+조/.test(t);
+    return new Paragraph({
+      alignment: isTitle ? AlignmentType.CENTER : AlignmentType.LEFT,
+      spacing: {before: isTitle?300:isArticle?180:60, after: isTitle?300:80},
+      children: [new TextRun({text:line, bold:isTitle||isArticle, size:isTitle?28:24, font:'맑은 고딕'})]
+    });
+  });
+  const doc = new Document({sections:[{
+    properties:{page:{size:{width:11906,height:16838},margin:{top:1440,right:1440,bottom:1440,left:1440}}},
+    children
+  }]});
+  const blob = await Packer.toBlob(doc);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = currentType + '_' + new Date().toLocaleDateString('ko-KR').replace(/\. /g,'-').replace('.','') + '.docx';
+  a.click();
+}
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold: 0.1});
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+renderTypes(); renderForm();
+</script>
+</body>
+</html>
