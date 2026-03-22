@@ -441,7 +441,7 @@ ${extra?`\n[추가 요청사항]\n${extra}`:''}
 7. 순수 텍스트로만 작성`;
 
   try {
-    const r = await fetch('/.netlify/functions/generate', {
+    const r = await fetch('/api/generate', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ prompt })
